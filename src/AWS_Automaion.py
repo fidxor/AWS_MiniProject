@@ -54,7 +54,8 @@ sudo cp mariadb-java-client-2.7.5.jar /usr/local/tomcat/lib/ && \\
 sudo wget https://downloads.mysql.com/archives/get/p/3/file/mysql-connector-java-5.1.40.tar.gz && \\
 sudo tar xvf mysql-connector-java-5.1.40.tar.gz && \\
 sudo cp mysql-connector-java-5.1.40/mysql-connector-java-5.1.40-bin.jar /usr/local/tomcat/lib/ && \\
-sudo chmod 666 /etc/profile && sudo echo '%s' >> /etc/profile && source /etc/profile
+sudo chmod 666 /etc/profile && sudo echo '%s' >> /etc/profile && source /etc/profile && \\
+sudo chmod -R 755 /usr/local/tomcat/webapps/
 """ % (wasSource)
 
 ssh_to_instance(wasPublicIP, wasKeyFile, cmd)
@@ -79,10 +80,17 @@ ssh_to_instance(webPublicIP, webKeyFile, cmd)
 # 4. dbEC2 생성및 초기 프로그램 설치 설정. wasEC2 로컬IP필요
 dbInstanceid, dbPrivateIP, dbPublicIP, dbKeyFile = make(ec2, dbConfig, f'{wasPrivateIP}/32')
 
+# 초기 설정할 sql 파일 로드
+with open("./data/initQuery.sql", 'r') as sql_file:
+    sqlFile = ""
+    for line in sql_file:
+        sqlFile += line
+
 cmd = """sudo apt-get update && sudo apt update && \\
 sudo apt install -y mariadb-server && \\
 sudo sed -i 's/bind-address\\s*=\\s*127.0.0.1/bind-address = 0.0.0.0/' /etc/mysql/mariadb.conf.d/50-server.cnf && \\
 sudo systemctl restart mariadb && \\
-sudo systemctl enable mariadb && sudo mysqladmin -u root password abcd1234
+sudo systemctl enable mariadb && sudo mysqladmin -u root password abcd1234 && \\
+cat '%s' > ~/initSql.sql && mysql -u root -pabcd1234 < ./initSql.sql
 """
 ssh_to_instance(dbPublicIP, dbKeyFile, cmd)
