@@ -1,0 +1,42 @@
+{
+  "regionName": "ap-northeast-2",
+  "web": {
+    "instanceName": "web_",
+    "port": 80,
+    "imageID": "ami-01ed8ade75d4eee2f",
+    "instanceType": "t2.micro",
+    "deviceMapping": {
+      "Ebs": {
+        "DeleteOnTermination": true,
+        "VolumeSize": 8,
+        "VolumeType": "gp3"
+      }
+    }
+  },
+  "was": {
+    "instanceName": "was_",
+    "port": 8080,
+    "imageID": "ami-01ed8ade75d4eee2f",
+    "instanceType": "t2.micro",
+    "deviceMapping": {
+      "Ebs": {
+        "DeleteOnTermination": true,
+        "VolumeSize": 8,
+        "VolumeType": "gp3"
+      }
+    }
+  },
+  "db": {
+    "instanceName": "db_",
+    "port": 3306,
+    "imageID": "ami-01ed8ade75d4eee2f",
+    "instanceType": "t2.micro",
+    "deviceMapping": {
+      "Ebs": {
+        "DeleteOnTermination": true,
+        "VolumeSize": 8,
+        "VolumeType": "gp3"
+      }
+    }
+  }
+}
