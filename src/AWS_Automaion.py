@@ -7,6 +7,7 @@ from SSH_Connect import *
 from EC2_Stop import *
 from EC2_Start import *
 from EC2_Delete import *
+from EC2_Restart import *
 
 option = ""
 createCnt = 1
@@ -48,5 +49,7 @@ elif option == "start":
     startEC2(ec2, config['tagName'], config['tagValue'])    
 elif option == "stop":
     stopEC2(ec2, config['tagName'], config['tagValue'])
+elif option == "restart":
+    restartEC2(ec2, config['tagName'], config['tagValue'])
 else:
     print("옵션값이 잘못 되었습니다.")
