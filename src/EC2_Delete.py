@@ -1,25 +1,12 @@
-import boto3
-import os
-
-# AWS 자격 증명 설정 (환경 변수나 aws configure를 사용하여 설정된 상태여야 합니다)
-aws_access_key_id = 
-aws_secret_access_key = 
-region_name = 'ap-northeast-2'
-
-# 클라이언트 생성
-ec2 = boto3.client('ec2', 
-                   aws_access_key_id=aws_access_key_id, 
-                   aws_secret_access_key=aws_secret_access_key, 
-                   region_name=region_name)
 
 # 인스턴스 종료 및 삭제
-def terminate_instances_by_tag(tag_key, tag_value):
+def terminate_instances_by_tag(ec2, tagName, tagValue):
     # 인스턴스 ID 가져오기
     response = ec2.describe_instances(
         Filters=[
             {
-                'Name': f'tag:{tag_key}',
-                'Values': [tag_value]
+                'Name': f'tag:{tagName}',
+                'Values': [tagValue]
             }
         ]
     )
@@ -41,13 +28,13 @@ def terminate_instances_by_tag(tag_key, tag_value):
     print(f"EC2 instances {instance_ids} terminated.")
 
 # 태그 기반으로 보안 그룹 삭제
-def delete_security_groups_by_tag(tag_key, tag_value):
+def delete_security_groups_by_tag(ec2, tagName, tagValue):
     # 보안 그룹 ID 가져오기
     response = ec2.describe_security_groups(
         Filters=[
             {
-                'Name': f'tag:{tag_key}',
-                'Values': [tag_value]
+                'Name': f'tag:{tagName}',
+                'Values': [tagValue]
             }
         ]
     )
@@ -64,13 +51,13 @@ def delete_security_groups_by_tag(tag_key, tag_value):
         print(f"Security group with ID {sg_id} deleted.")
 
 # 태그 기반으로 키 페어 삭제
-def delete_key_pairs_by_tag(tag_key, tag_value):
+def delete_key_pairs_by_tag(ec2, tagName, tagValue):
     # 키 페어 이름 가져오기
     response = ec2.describe_key_pairs(
         Filters=[
             {
-                'Name': f'tag:{tag_key}',
-                'Values': [tag_value]
+                'Name': f'tag:{tagName}',
+                'Values': [tagValue]
             }
         ]
     )
@@ -89,14 +76,7 @@ def delete_key_pairs_by_tag(tag_key, tag_value):
         print(f"Key pair {key_name} and file {key_name}.pem deleted.")
 
 # 메인 함수
-def main():
-    # 태그 기반으로 인스턴스, 보안 그룹, 키 페어 삭제
-    tag_key = 'cloud'
-    tag_value = 'project'
-    
-    terminate_instances_by_tag(tag_key, tag_value)
-    delete_security_groups_by_tag(tag_key, tag_value)
-    delete_key_pairs_by_tag(tag_key, tag_value)
-
-if __name__ == '__main__':
-    main()
+def deleteEC2(ec2, tagName, tagValue):
+    terminate_instances_by_tag(ec2, tagName, tagValue)
+    delete_security_groups_by_tag(ec2, tagName, tagValue)
+    delete_key_pairs_by_tag(ec2, tagName, tagValue)
