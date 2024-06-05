@@ -32,6 +32,19 @@ def createEC2(ec2, config, index):
     export CLASSPATH=.:$JAVA_HOME/lib/mariadb-java-client-2.7.5.jar:$CATALINA_HOME/lib/mariadb-java-client-2.7.5.jar:$CATALINA_HOME/lib/mysql-connector-java-5.1.40-bin.jar
     '''
 
+    tomcatSource = '''[Unit]
+    Description=Startup script for Tomcat
+    After=network.target
+
+    [Service]
+    Type=simple
+    ExecStart=/usr/local/tomcat/bin/startup.sh
+    RemainAfterExit=true
+
+    [Install]
+    WantedBy=multi-user.target
+    '''
+
     cmd = """sudo apt-get update && sudo apt update && sudo apt install -y openjdk-8-jdk && \\
     sudo wget http://archive.apache.org/dist/tomcat/tomcat-9/v9.0.4/bin/apache-tomcat-9.0.4.tar.gz && \\
     sudo tar xvzf ./apache-tomcat-9.0.4.tar.gz && sudo mv ./apache-tomcat-9.0.4 /usr/local/tomcat && \\
@@ -41,9 +54,14 @@ def createEC2(ec2, config, index):
     sudo wget https://downloads.mysql.com/archives/get/p/3/file/mysql-connector-java-5.1.40.tar.gz && \\
     sudo tar xvf mysql-connector-java-5.1.40.tar.gz && \\
     sudo cp mysql-connector-java-5.1.40/mysql-connector-java-5.1.40-bin.jar /usr/local/tomcat/lib/ && \\
-    sudo chmod 666 /etc/profile && sudo echo '%s' >> /etc/profile && source /etc/profile && source /etc/profile &&\\
-    sudo /usr/local/tomcat/bin/startup.sh && sudo chmod -R 777 /usr/local/tomcat/webapps/
-    """ % (wasSource)
+    sudo chmod 666 /etc/profile && sudo echo '%s' >> /etc/profile && source /etc/profile && source /etc/profile && \\
+    sudo echo '%s' >> /etc/systemd/system/tomcatAuto.service && \\
+    sudo systemctl daemon-reload && \\
+    sudo systemctl enable tomcatAuto.service && \\
+    sudo systemctl start tomcatAuto.service && \\
+    sudo systemctl status tomcat && \\
+    sudo chmod -R 777 /usr/local/tomcat/webapps/
+    """ % (wasSource, tomcatSource)
 
     ssh_to_instance(wasPublicIP, wasKeyFile, cmd)
     # # 3. wasEC2의 로컬 IP를 이용해서 webEC2의 /etc/nginx/sites-available/default 파일 설정
