@@ -45,7 +45,7 @@ def createEC2(ec2, config, index):
     WantedBy=multi-user.target
     '''
 
-    cmd = """sudo apt-get update && sudo apt update && sudo apt install -y openjdk-8-jdk && \\
+    cmd = """sudo apt-get update && sudo apt update && sudo apt install -y openjdk-8-jdk net-tools && \\
     sudo wget http://archive.apache.org/dist/tomcat/tomcat-9/v9.0.4/bin/apache-tomcat-9.0.4.tar.gz && \\
     sudo tar xvzf ./apache-tomcat-9.0.4.tar.gz && sudo mv ./apache-tomcat-9.0.4 /usr/local/tomcat && \\
     sudo wget https://dlm.mariadb.com/1965742/Connectors/java/connector-java-2.7.5/mariadb-java-client-2.7.5.jar && \\
@@ -55,15 +55,17 @@ def createEC2(ec2, config, index):
     sudo tar xvf mysql-connector-java-5.1.40.tar.gz && \\
     sudo cp mysql-connector-java-5.1.40/mysql-connector-java-5.1.40-bin.jar /usr/local/tomcat/lib/ && \\
     sudo chmod 666 /etc/profile && sudo echo '%s' >> /etc/profile && source /etc/profile && source /etc/profile && \\
-    sudo echo '%s' >> /etc/systemd/system/tomcatAuto.service && \\
+    sudo touch /etc/systemd/system/tomcat_startup.service && sudo chmod 666 /etc/systemd/system/tomcat_startup.service &&\\
+    sudo echo '%s' > /etc/systemd/system/tomcat_startup.service && \\
     sudo systemctl daemon-reload && \\
-    sudo systemctl enable tomcatAuto.service && \\
-    sudo systemctl start tomcatAuto.service && \\
+    sudo systemctl enable tomcat_startup.service && \\
+    sudo systemctl start tomcat_startup.service && \\
     sudo systemctl status tomcat && \\
     sudo chmod -R 777 /usr/local/tomcat/webapps/
     """ % (wasSource, tomcatSource)
 
     ssh_to_instance(wasPublicIP, wasKeyFile, cmd)
+    
     # # 3. wasEC2의 로컬 IP를 이용해서 webEC2의 /etc/nginx/sites-available/default 파일 설정
     webSource = """
     server {
