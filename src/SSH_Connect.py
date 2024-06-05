@@ -9,7 +9,7 @@ def wait_until_running(ec2, instance_id):
     print("Instance is now running")
 
 # 5. SSH로 인스턴스에 연결하여 명령 실행
-def ssh_to_instance(ip_address, key_file, cmd, username='ubuntu', max_attempts=20, sleep_time=3):
+def ssh_to_instance(ip_address, key_file, cmd, username='ubuntu', max_attempts=50, sleep_time=3):
     key = paramiko.RSAKey.from_private_key_file(key_file)
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())

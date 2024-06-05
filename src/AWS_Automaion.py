@@ -6,17 +6,25 @@ from EC2_Maker import *
 from SSH_Connect import *
 from EC2_Stop import *
 from EC2_Start import *
+from EC2_Delete import *
 
 option = ""
 createCnt = 1
 
+print(sys.argv)
+
 if len(sys.argv) == 2:
     option = sys.argv[1]
 elif len(sys.argv) > 2:
-    createCnt = sys.argv[3]
+    option = sys.argv[1]
+    createCnt = int(sys.argv[2])
 else:
+    print(os.getenv('AWS_ACCESS_KEY'))
+    print(os.getenv('AWS_SECRET_KEY'))
     print("옵션을 지정해 주세요.")
     exit(1)
+
+print(option)
 
 with open("./data/AWS_Config.json", 'r') as config_file:
     config = json.load(config_file)
@@ -32,14 +40,13 @@ ec2 = boto3.client('ec2',
                    region_name=region_name)
 
 if option == "create":
-    for i in range(createCnt):
-        createEC2(ec2, config)
+    for i in range(1, createCnt + 1):
+        createEC2(ec2, config, i)
 elif option == "delete":
-    #deleteEC2(ec2, config['tagName'], config['tagValue']))
-    pass
+    deleteEC2(ec2, config['tagName'], config['tagValue'])    
 elif option == "start":
-    #startEC2(ec2, config['tagName'], config['tagValue']))
-    pass
+    startEC2(ec2, config['tagName'], config['tagValue'])    
 elif option == "stop":
-    #stopEC2(ec2, config['tagName'], config['tagValue'])
-    pass
+    stopEC2(ec2, config['tagName'], config['tagValue'])
+else:
+    print("옵션값이 잘못 되었습니다.")

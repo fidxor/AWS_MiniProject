@@ -7,6 +7,9 @@ def createEC2(ec2, config, index):
     wasConfig = config['was']
     dbConfig = config['db']
 
+    tagName = config['tagName']
+    tagValue = config['tagValue']
+
     '''
     sys로 외부 argument 받아서 create, delete, start, stop 구현 
     create일 경우 몇개를 만들지 입력받음 default값은 1 
@@ -17,12 +20,12 @@ def createEC2(ec2, config, index):
     '''
 
     # 1. webEC2 생성 및 초기 프로그램 설치
-    webInstanceid, webPrivateIP, webPublicIP, webKeyFile = make(ec2, webConfig, '0.0.0.0/0')
+    webInstanceid, webPrivateIP, webPublicIP, webKeyFile = make(ec2, webConfig, tagName, tagValue, index, '0.0.0.0/0')
     cmd = "sudo apt-get install -y net-tools nginx && sudo systemctl enable nginx"
     ssh_to_instance(webPublicIP, webKeyFile, cmd)
 
     # 2. wasEC2 생성 및 초기 프로그램 설치 설정. webEC2 로컬IP필요
-    wasInstanceid, wasPrivateIP, wasPublicIP, wasKeyFile = make(ec2, wasConfig, f'{webPrivateIP}/32')
+    wasInstanceid, wasPrivateIP, wasPublicIP, wasKeyFile = make(ec2, wasConfig,  tagName, tagValue, index, f'{webPrivateIP}/32')
 
 
 
@@ -85,7 +88,7 @@ def createEC2(ec2, config, index):
 
 
     # 4. dbEC2 생성및 초기 프로그램 설치 설정. wasEC2 로컬IP필요
-    dbInstanceid, dbPrivateIP, dbPublicIP, dbKeyFile = make(ec2, dbConfig, f'{wasPrivateIP}/32')
+    dbInstanceid, dbPrivateIP, dbPublicIP, dbKeyFile = make(ec2, dbConfig,  tagName, tagValue, index, f'{wasPrivateIP}/32')
     # dbInstanceid, dbPrivateIP, dbPublicIP, dbKeyFile = make(ec2, dbConfig, '0.0.0.0/0')
 
     # 초기 설정할 sql 파일 로드
