@@ -47,7 +47,6 @@ elif option == "delete":
 elif option == "start":
     startEC2(ec2, config['tagName'], config['tagValue'])    
 elif option == "stop":
-    #stopEC2(ec2, config['tagName'], config['tagValue'])
-    print("stop EC2")
+    stopEC2(ec2, config['tagName'], config['tagValue'])    
 else:
     print("옵션값이 잘못 되었습니다.")

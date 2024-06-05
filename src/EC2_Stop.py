@@ -22,10 +22,11 @@ def stop_ec2_instance(ec2, instance_ids):
 def stopEC2(ec2, tagName, tagValue):
     # 태그 필터 구성
     filters = [
-        {'Name': tagName,'Values': tagValue}
+        {'Name': f'tag:{tagName}','Values': [tagValue]},
+        {'Name': 'instance-state-name', 'Values': ['running']}
     ]
     
-    instance_ids = get_instance_id_by_tag(filters)
+    instance_ids = get_instance_id_by_tag(ec2, filters)
     
     if instance_ids:
         stop_ec2_instance(ec2, instance_ids)
