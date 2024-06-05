@@ -1,3 +1,4 @@
+import os
 
 # 인스턴스 종료 및 삭제
 def terminate_instances_by_tag(ec2, tagName, tagValue):

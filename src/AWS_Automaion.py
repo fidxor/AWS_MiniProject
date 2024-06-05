@@ -6,6 +6,7 @@ from EC2_Maker import *
 from SSH_Connect import *
 from EC2_Stop import *
 from EC2_Start import *
+from EC2_Delete import *
 
 option = ""
 createCnt = 1
@@ -42,11 +43,10 @@ if option == "create":
     for i in range(1, createCnt + 1):
         createEC2(ec2, config, i)
 elif option == "delete":
-    #deleteEC2(ec2, config['tagName'], config['tagValue'])
-    print("delete EC2")
+    deleteEC2(ec2, config['tagName'], config['tagValue'])    
 elif option == "start":
     startEC2(ec2, config['tagName'], config['tagValue'])    
 elif option == "stop":
-    stopEC2(ec2, config['tagName'], config['tagValue'])    
+    stopEC2(ec2, config['tagName'], config['tagValue'])
 else:
     print("옵션값이 잘못 되었습니다.")
