@@ -73,8 +73,7 @@ def create_ec2_instance(ec2, image_id, instance_type, key_name, security_group_i
     print(f'Created EC2 instance {instance_id}')
     return instance_id, privateIP
 
-def make(ec2, conf, privateIP = "0.0.0.0"):
-    index = 1
+def make(ec2, conf, index = 1, privateIP = "0.0.0.0"):    
     key_name = f"{conf['instanceName']}{index}"
     key_file = create_key_pair(ec2, key_name)
 
@@ -83,7 +82,7 @@ def make(ec2, conf, privateIP = "0.0.0.0"):
     print(f"vpc_id {vpc_id}")
 
     # 보안 그룹 생성
-    group_name = f'{key_name}_sg1'
+    group_name = f'{key_name}_sg'
     description = f'Security group for {key_name} instance'
     security_group_id = create_security_group(ec2, group_name, description, vpc_id, conf, privateIP)
 
@@ -94,7 +93,7 @@ def make(ec2, conf, privateIP = "0.0.0.0"):
         {
             'ResourceType': 'instance',
             'Tags': [
-                {'Key': 'Name', 'Value': 'web_1'}                
+                {'Key': 'Name', 'Value': key_name}                
             ]
         }
     ]

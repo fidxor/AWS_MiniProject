@@ -1,5 +1,7 @@
 {
   "regionName": "ap-northeast-2",
+  "tagName": "autoGroup",
+  "tagValue": "autoMake",
   "web": {
     "instanceName": "web_",
     "port": 80,
