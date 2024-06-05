@@ -45,8 +45,7 @@ elif option == "delete":
     #deleteEC2(ec2, config['tagName'], config['tagValue'])
     print("delete EC2")
 elif option == "start":
-    #startEC2(ec2, config['tagName'], config['tagValue'])
-    print("start EC2")
+    startEC2(ec2, config['tagName'], config['tagValue'])    
 elif option == "stop":
     #stopEC2(ec2, config['tagName'], config['tagValue'])
     print("stop EC2")
