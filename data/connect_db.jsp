@@ -13,7 +13,7 @@ catch(Exception e){
   out.write("Error!!!!!!" + e);
 }
 try {
-  conn=DriverManager.getConnection("jdbc:mysql://ipAddress:3306/cloud_db", "mydb","abcd1234");
+  conn=DriverManager.getConnection("jdbc:mysql://ipAddress:3306/cloud_db", "mydb", "");
   out.write("<font color='blue'>Connected!</font>");
 }
 catch(SQLException e) {

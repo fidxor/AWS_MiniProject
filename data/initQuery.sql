@@ -1,4 +1,4 @@
 create database cloud_db;
-create user 'mydb'@'%' identified by 'abcd1234';
-grant all privileges on *.* to 'mydb'@'%';
+create user 'mydb'@'ipAddress';
+grant all privileges on cloud_db.* to 'mydb'@'ipAddress';
 flush privileges;

@@ -28,14 +28,15 @@ def createEC2(ec2, config, index):
     wasInstanceid, wasPrivateIP, wasPublicIP, wasKeyFile = make(ec2, wasConfig,  tagName, tagValue, index, f'{webPrivateIP}/32')
 
 
- # 줄바꿈 수정하지 말아주세요
+ # wasSource, tomcarSource 줄바꿈 수정 금지
+    # was /etc/profile 환경변수 추가
     wasSource = '''export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64/
 export CATALINA_HOME=/usr/local/tomcat
 PATH=$PATH:$JAVA_HOME/bin:$CATALINA_HOME/bin
 export CLASSPATH=.:$JAVA_HOME/lib/mariadb-java-client-2.7.5.jar:$CATALINA_HOME/lib/mariadb-java-client-2.7.5.jar:$CATALINA_HOME/lib/mysql-connector-java-5.1.40-bin.jar
     '''
-
-    tomcatSource = '''[Unit] 
+    # tomcat 자동 실행을 위한 스크립트 작성
+    tomcatSource = '''[Unit]
 Description=Startup script for Tomcat
 After=network.target
 
@@ -47,9 +48,9 @@ RemainAfterExit=true
 [Install]
 WantedBy=multi-user.target
 '''
-
+    # was서버를 설정을 위한 명령어
     cmd = """
-    sudo apt-get update && sudo apt update && sudo apt install -y openjdk-8-jdk && \\
+    sudo apt-get update && sudo apt update && sudo apt install -y openjdk-8-jdk mysql-client-core-8.0 && \\
     sudo wget http://archive.apache.org/dist/tomcat/tomcat-9/v9.0.4/bin/apache-tomcat-9.0.4.tar.gz && \\
     sudo tar xvzf ./apache-tomcat-9.0.4.tar.gz && sudo mv ./apache-tomcat-9.0.4 /usr/local/tomcat && \\
     sudo wget https://dlm.mariadb.com/1965742/Connectors/java/connector-java-2.7.5/mariadb-java-client-2.7.5.jar && \\
@@ -61,11 +62,10 @@ WantedBy=multi-user.target
     sudo chmod 666 /etc/profile && echo '%s' | sudo tee -a /etc/profile && source /etc/profile && \\
     sudo touch /etc/systemd/system/tomcat_startup.service && sudo chmod 666 /etc/systemd/system/tomcat_startup.service && \\
     echo '%s' | sudo tee /etc/systemd/system/tomcat_startup.service && \\
-    sudo /usr/local/tomcat/bin/startup.sh
+    sudo /usr/local/tomcat/bin/startup.sh && \\
     sudo systemctl daemon-reload && \\
     sudo systemctl enable tomcat_startup.service && \\
-    sudo systemctl start tomcat_startup.service && \\
-    sudo systemctl status tomcat && \\
+    sudo systemctl start tomcat_startup.service && \\    
     sudo chmod -R 777 /usr/local/tomcat/webapps/
     """ % (wasSource, tomcatSource)
 
@@ -91,7 +91,6 @@ WantedBy=multi-user.target
 
     # 4. dbEC2 생성및 초기 프로그램 설치 설정. wasEC2 로컬IP필요
     dbInstanceid, dbPrivateIP, dbPublicIP, dbKeyFile = make(ec2, dbConfig,  tagName, tagValue, index, f'{wasPrivateIP}/32')
-    # dbInstanceid, dbPrivateIP, dbPublicIP, dbKeyFile = make(ec2, dbConfig, '0.0.0.0/0')
 
     # 초기 설정할 sql 파일 로드
     with open("./data/initQuery.sql", 'r') as sql_file:
@@ -99,29 +98,17 @@ WantedBy=multi-user.target
         for line in sql_file:
             sqlFile += line
 
-
     print(sqlFile)
 
-    # sudo apt-get install -y mysql-server-8.0
-    # /etc/mysql/mysql.conf.d/mysqld.cnf
-
-    '''
-    cmd = """sudo apt-get update && sudo apt update && \\
-    sudo apt install -y mysql-server-8.0 && \\
-    sudo sed -i 's/127.0.0.1/0.0.0.0/' /etc/mysql/mysql.conf.d/mysqld.cnf && \\
-    sudo systemctl restart mysql && \\
-    sudo systemctl enable mysql && sudo mysqladmin -u root password abcd1234 && \\
-    echo '%s' > ./initSql.sql && sudo mysql -u root -pabcd1234 < ./initSql.sql
-    """ % (sqlFile)    
-    '''
-
+    #db 서버 설정을 위한 명령어
     cmd = """sudo apt-get update && sudo apt update && \\
     sudo apt install -y mariadb-server && \\
     sudo sed -i 's/bind-address\\s*=\\s*127.0.0.1/bind-address = 0.0.0.0/' /etc/mysql/mariadb.conf.d/50-server.cnf && \\
     sudo systemctl restart mariadb && \\
     sudo systemctl enable mariadb && sudo mysqladmin -u root password abcd1234 && \\
-    echo '%s' > ./initSql.sql && sudo mysql -u root -pabcd1234 < ./initSql.sql
-    """ % (sqlFile)
+    echo '%s' > ./initSql.sql && sudo sed -i 's/ipAddress/%s/g' ./initSql.sql && \\
+    sudo mysql -u root -pabcd1234 < ./initSql.sql
+    """ % (sqlFile, wasPrivateIP)
     ssh_to_instance(dbPublicIP, dbKeyFile, cmd)
 
     #db 연결 확인용 jsp 파일

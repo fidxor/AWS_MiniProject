@@ -27,7 +27,7 @@ else:
 
 print(option)
 
-with open("/mnt/d/code/AWS_MiniProject/data/AWS_Config.json", 'r') as config_file:
+with open("./data/AWS_Config.json", 'r') as config_file:
     config = json.load(config_file)
 
 aws_access_key_id = os.getenv('AWS_ACCESS_KEY')
