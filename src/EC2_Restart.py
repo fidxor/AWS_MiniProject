@@ -1,5 +1,5 @@
 # 실행 중인 인스턴스를 재부팅하는 함수
-def reboot_running_instance(ec2, tagName, tagValue):
+def restartEC2(ec2, tagName, tagValue):
     # 필터 조건 설정
     filters = [
         {
@@ -22,9 +22,3 @@ def reboot_running_instance(ec2, tagName, tagValue):
             print(f"Rebooting instance {instance_id}")
             ec2.reboot_instances(InstanceIds=[instance_id])
             print(f"Instance {instance_id} rebooted successfully.")
-
-# 메인 함수
-def restartEC2(ec2, tagName, tagValue):    
-    
-    # 실행 중인 인스턴스 재부팅
-    reboot_running_instance(ec2, tagName, tagValue)
