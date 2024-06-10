@@ -28,27 +28,28 @@ def createEC2(ec2, config, index):
     wasInstanceid, wasPrivateIP, wasPublicIP, wasKeyFile = make(ec2, wasConfig,  tagName, tagValue, index, f'{webPrivateIP}/32')
 
 
-
+ # 줄바꿈 수정하지 말아주세요
     wasSource = '''export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64/
-    export CATALINA_HOME=/usr/local/tomcat
-    PATH=$PATH:$JAVA_HOME/bin:$CATALINA_HOME/bin
-    export CLASSPATH=.:$JAVA_HOME/lib/mariadb-java-client-2.7.5.jar:$CATALINA_HOME/lib/mariadb-java-client-2.7.5.jar:$CATALINA_HOME/lib/mysql-connector-java-5.1.40-bin.jar
+export CATALINA_HOME=/usr/local/tomcat
+PATH=$PATH:$JAVA_HOME/bin:$CATALINA_HOME/bin
+export CLASSPATH=.:$JAVA_HOME/lib/mariadb-java-client-2.7.5.jar:$CATALINA_HOME/lib/mariadb-java-client-2.7.5.jar:$CATALINA_HOME/lib/mysql-connector-java-5.1.40-bin.jar
     '''
 
-    tomcatSource = '''[Unit]
-    Description=Startup script for Tomcat
-    After=network.target
+    tomcatSource = '''[Unit] 
+Description=Startup script for Tomcat
+After=network.target
 
-    [Service]
-    Type=simple
-    ExecStart=/usr/local/tomcat/bin/startup.sh
-    RemainAfterExit=true
+[Service]
+Type=simple
+ExecStart=/usr/local/tomcat/bin/startup.sh
+RemainAfterExit=true
 
-    [Install]
-    WantedBy=multi-user.target
-    '''
+[Install]
+WantedBy=multi-user.target
+'''
 
-    cmd = """sudo apt-get update && sudo apt update && sudo apt install -y openjdk-8-jdk net-tools && \\
+    cmd = """
+    sudo apt-get update && sudo apt update && sudo apt install -y openjdk-8-jdk && \\
     sudo wget http://archive.apache.org/dist/tomcat/tomcat-9/v9.0.4/bin/apache-tomcat-9.0.4.tar.gz && \\
     sudo tar xvzf ./apache-tomcat-9.0.4.tar.gz && sudo mv ./apache-tomcat-9.0.4 /usr/local/tomcat && \\
     sudo wget https://dlm.mariadb.com/1965742/Connectors/java/connector-java-2.7.5/mariadb-java-client-2.7.5.jar && \\
@@ -57,9 +58,10 @@ def createEC2(ec2, config, index):
     sudo wget https://downloads.mysql.com/archives/get/p/3/file/mysql-connector-java-5.1.40.tar.gz && \\
     sudo tar xvf mysql-connector-java-5.1.40.tar.gz && \\
     sudo cp mysql-connector-java-5.1.40/mysql-connector-java-5.1.40-bin.jar /usr/local/tomcat/lib/ && \\
-    sudo chmod 666 /etc/profile && sudo echo '%s' >> /etc/profile && source /etc/profile && source /etc/profile && \\
-    sudo touch /etc/systemd/system/tomcat_startup.service && sudo chmod 666 /etc/systemd/system/tomcat_startup.service &&\\
-    sudo echo '%s' > /etc/systemd/system/tomcat_startup.service && \\
+    sudo chmod 666 /etc/profile && echo '%s' | sudo tee -a /etc/profile && source /etc/profile && \\
+    sudo touch /etc/systemd/system/tomcat_startup.service && sudo chmod 666 /etc/systemd/system/tomcat_startup.service && \\
+    echo '%s' | sudo tee /etc/systemd/system/tomcat_startup.service && \\
+    sudo /usr/local/tomcat/bin/startup.sh
     sudo systemctl daemon-reload && \\
     sudo systemctl enable tomcat_startup.service && \\
     sudo systemctl start tomcat_startup.service && \\
