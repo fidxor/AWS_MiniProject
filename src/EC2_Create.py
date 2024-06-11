@@ -1,8 +1,11 @@
 import boto3
 from EC2_Maker import *
 from SSH_Connect import *
+from EC2_CreateSnapshot import *
 
 def createEC2(ec2, config, index):
+    isSnapshot = (index == 1)
+
     webConfig = config['web']
     wasConfig = config['was']
     dbConfig = config['db']
@@ -24,11 +27,14 @@ def createEC2(ec2, config, index):
     cmd = "sudo apt-get install -y net-tools nginx && sudo systemctl enable nginx"
     ssh_to_instance(webPublicIP, webKeyFile, cmd)
 
+    # web Instance 스냅샷 만들기
+    if isSnapshot:
+        createSnapshot(ec2, webInstanceid, config['tagName'], config['tagValue'])
+
     # 2. wasEC2 생성 및 초기 프로그램 설치 설정. webEC2 로컬IP필요
     wasInstanceid, wasPrivateIP, wasPublicIP, wasKeyFile = make(ec2, wasConfig,  tagName, tagValue, index, f'{webPrivateIP}/32')
 
-
- # wasSource, tomcarSource 줄바꿈 수정 금지
+    # wasSource, tomcarSource 줄바꿈 수정 금지
     # was /etc/profile 환경변수 추가
     wasSource = '''export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64/
 export CATALINA_HOME=/usr/local/tomcat
@@ -70,6 +76,10 @@ WantedBy=multi-user.target
     """ % (wasSource, tomcatSource)
 
     ssh_to_instance(wasPublicIP, wasKeyFile, cmd)
+
+    # was Instance 스냅샷 만들기
+    if isSnapshot:
+        createSnapshot(ec2, wasInstanceid, config['tagName'], config['tagValue'])
     
     # # 3. wasEC2의 로컬 IP를 이용해서 webEC2의 /etc/nginx/sites-available/default 파일 설정
     webSource = """
@@ -87,6 +97,8 @@ WantedBy=multi-user.target
 
     cmd = f"sudo chmod 666 /etc/nginx/sites-available/default && sudo echo '{webSource}' > /etc/nginx/sites-available/default && sudo systemctl restart nginx"
     ssh_to_instance(webPublicIP, webKeyFile, cmd)
+
+    
 
 
     # 4. dbEC2 생성및 초기 프로그램 설치 설정. wasEC2 로컬IP필요
@@ -110,6 +122,10 @@ WantedBy=multi-user.target
     sudo mysql -u root -pabcd1234 < ./initSql.sql
     """ % (sqlFile, wasPrivateIP)
     ssh_to_instance(dbPublicIP, dbKeyFile, cmd)
+
+    # db Instance 스냅샷 만들기
+    if isSnapshot:
+        createSnapshot(ec2, dbInstanceid, config['tagName'], config['tagValue'])
 
     #db 연결 확인용 jsp 파일
     with open("./data/connect_db.jsp", 'r') as jsp_file:

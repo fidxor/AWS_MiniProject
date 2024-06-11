@@ -76,8 +76,29 @@ def delete_key_pairs_by_tag(ec2, tagName, tagValue):
             os.remove(f"./{key_name}.pem")
         print(f"Key pair {key_name} and file {key_name}.pem deleted.")
 
+# 태그 기반으로 스냅샷 삭제
+def delete_snapshot_by_tag(ec2, tagName, tagValue):
+    response = ec2.describe_snapshots(
+        Filters=[
+            {
+                'Name':f'tag:{tagName}',
+                'Values': [tagValue]
+            }
+        ]
+    )
+
+    snapshots = response['Snapshots']
+
+    # 스냅샷 삭제
+    for snapshot in snapshots:
+        snapshot_id = snapshot['SnapshotId']
+        print(f"Deleting snapshot {snapshot_id}...")
+        ec2.delete_snapshot(SnapshotId=snapshot_id)
+        print(f"Deleted snapshot {snapshot_id}")
+
 # 메인 함수
 def deleteEC2(ec2, tagName, tagValue):
     terminate_instances_by_tag(ec2, tagName, tagValue)
     delete_security_groups_by_tag(ec2, tagName, tagValue)
     delete_key_pairs_by_tag(ec2, tagName, tagValue)
+    delete_snapshot_by_tag(ec2, tagName, tagValue)
